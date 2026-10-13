@@ -1,6 +1,7 @@
-import axios from 'axios';
-
-const API_BASE = import.meta.env.VITE_API_BASE_URL || "https://dating-agent-backend2.onrender.com/api";
+// Resolve API Base dynamically from .env (VITE_API_BASE_URL)
+const isProd = Boolean(import.meta.env.PROD || (typeof window !== 'undefined' && window.location.hostname.includes('onrender.com')));
+const defaultBase = isProd ? 'https://dating-agent-backend2.onrender.com/api' : '/api';
+const API_BASE = import.meta.env.VITE_API_BASE_URL || defaultBase;
 
 const client = axios.create({
   baseURL: API_BASE,
