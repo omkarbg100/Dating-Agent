@@ -159,7 +159,15 @@ export const getRunStatus = async (req, res) => {
 export const getParticipantRankings = async (req, res) => {
   try {
     const { id } = req.params;
-    const { runId } = req.query;
+    let { runId } = req.query;
+
+    // If no runId is specified, pick the latest run containing rankings for this participant
+    if (!runId) {
+      const latestRanking = await Ranking.findOne({ participantId: id }).sort({ createdAt: -1 });
+      if (latestRanking) {
+        runId = latestRanking.runId;
+      }
+    }
 
     const query = { participantId: id };
     if (runId) {
@@ -167,12 +175,28 @@ export const getParticipantRankings = async (req, res) => {
     }
 
     // Sort descending by reciprocalScore
-    const rankings = await Ranking.find(query)
+    const rawRankings = await Ranking.find(query)
       .populate('candidateId', 'name linkedinUrl instagramUrl')
       .populate('participantId', 'name')
-      .sort({ rank: 1, reciprocalScore: -1 });
+      .sort({ reciprocalScore: -1, rank: 1 });
 
-    return res.json(rankings);
+    // Deduplicate by candidateId so each candidate is shown strictly once
+    const seenCandidates = new Set();
+    const uniqueRankings = [];
+    for (const r of rawRankings) {
+      const cId = r.candidateId?._id?.toString() || r.candidateId?.toString();
+      if (cId && !seenCandidates.has(cId)) {
+        seenCandidates.add(cId);
+        uniqueRankings.push(r);
+      }
+    }
+
+    // Normalize rank numbers 1..N
+    uniqueRankings.forEach((r, idx) => {
+      r.rank = idx + 1;
+    });
+
+    return res.json(uniqueRankings);
   } catch (error) {
     console.error('Error fetching rankings:', error);
     return res.status(500).json({ error: error.message });
