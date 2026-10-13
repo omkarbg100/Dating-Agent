@@ -59,11 +59,20 @@ export const DatingArenaAndRankings = () => {
     const loadRankings = async () => {
       try {
         setLoadingRankings(true);
-        const data = await api.getParticipantRankings(selectedParticipantId);
-        setRankings(data);
+        const rawData = data || [];
+        const uniqueRankings = [];
+        const seenCandidateIds = new Set();
+        for (const item of rawData) {
+          const cId = item.candidateId?._id || item.candidateId;
+          if (cId && !seenCandidateIds.has(cId)) {
+            seenCandidateIds.add(cId);
+            uniqueRankings.push(item);
+          }
+        }
+        setRankings(uniqueRankings);
         // If there are rankings, set the first pair as default for arena
-        if (data.length > 0 && !activePairId) {
-          const firstRank = data[0];
+        if (uniqueRankings.length > 0 && !activePairId) {
+          const firstRank = uniqueRankings[0];
           const sessionKey = firstRank.datingSessionId || `date_${selectedParticipantId}_${firstRank.candidateId?._id || firstRank.candidateId}`;
           setActivePairId(sessionKey);
         }
