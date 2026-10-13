@@ -59,6 +59,7 @@ export const DatingArenaAndRankings = () => {
     const loadRankings = async () => {
       try {
         setLoadingRankings(true);
+        const data = await api.getParticipantRankings(selectedParticipantId);
         const rawData = data || [];
         const uniqueRankings = [];
         const seenCandidateIds = new Set();
