@@ -1,0 +1,9 @@
+{
+  "name": "agentic-dating-suite",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "keep-alive": "node scripts/keep-alive.js"
+  }
+}
