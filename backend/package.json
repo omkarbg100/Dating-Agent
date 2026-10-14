@@ -7,7 +7,9 @@
   "scripts": {
     "start": "node src/app.js",
     "dev": "node --watch src/app.js",
-    "keep-alive": "node keep-alive.js"
+    "keep-alive": "node keep-alive.js",
+    "start:all": "concurrently --names server,pinger --prefix-colors blue,magenta \"node src/app.js\" \"node keep-alive.js\"",
+    "dev:all": "concurrently --names server,pinger --prefix-colors blue,magenta \"node --watch src/app.js\" \"node keep-alive.js\""
   },
   "dependencies": {
     "axios": "^1.7.9",
@@ -16,5 +18,8 @@
     "express": "^4.21.2",
     "mongodb-memory-server": "^10.1.3",
     "mongoose": "^8.9.5"
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.6"
   }
 }
